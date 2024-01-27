@@ -1,5 +1,5 @@
 class ChatroomMembershipSerializer < ActiveModel::Serializer
-  attributes :id
-  has_one :chatroom
-  has_one :user
+  attributes :id, :user_id, :chatroom_id
+  #has_one :chatroom
+  #has_one :user
 end
