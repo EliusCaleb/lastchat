@@ -1,14 +1,23 @@
 Rails.application.routes.draw do
-  resources :chatroom_memberships
-  resources :messages
-  resources :chatrooms
-  resources :users
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-    mount ActionCable.server => '/cable'
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  namespace :api do
+    post '/login', to: 'sessions#create'
+    delete '/logout', to: 'sessions#destroy'
+    get '/me', to: 'users#show'
+    post '/signup', to: 'users#create'
+    get '/profile', to: 'users#profile'
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+    resources :chatrooms, only: [:index, :show] do
+      resources :messages, only: [:create, :update]
+      resources :chatroom_memberships, only: [:create, :destroy]
+    end
+    
+    resources :users, only: [:update]
+    resources :messages, only: [:show, :destroy]
+  end
+
+  mount ActionCable.server => '/cable'
+  
+  get '*path',
+    to: 'fallback#index',
+    constraints: ->(req) { !req.xhr? && req.format.html? }
 end
